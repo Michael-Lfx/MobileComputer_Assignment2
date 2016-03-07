@@ -34,18 +34,30 @@
     
     self.motionManager = [CMMotionManager new];
     
-    [self.motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXTrueNorthZVertical
-                                                            toQueue:[NSOperationQueue mainQueue]
-                                                        withHandler:^(CMDeviceMotion * motion, NSError * error) {
-                                                            NSLog(@"attitude: %f %f %f",
-                                                                  motion.attitude.pitch,
-                                                                  motion.attitude.roll,
-                                                                  motion.attitude.yaw);
-                                                            AudioManager *audioManager = [AudioManager instance];
-                                                            [audioManager setFrequency:100+50*motion.attitude.pitch/(M_PI*2)];
-                                                            [audioManager setFrequency2:100+50*motion.attitude.roll/(M_PI*2)];
-                                                            [audioManager setFrequency3:100+50*motion.attitude.yaw/(M_PI*2)];
-                                                        }];
+        [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue]
+                                                 withHandler:^(CMAccelerometerData *accelerometerData, NSError *error){
+                                                     NSLog(@"accelerometer: %f %f %f",
+                                                           accelerometerData.acceleration.x,
+                                                           accelerometerData.acceleration.y,
+                                                           accelerometerData.acceleration.z);
+    
+                                                     AudioManager *audioManager = [AudioManager instance];
+                                                     [audioManager setFrequency:accelerometerData.acceleration.x];
+                                                     [audioManager setFrequency2:500+200*accelerometerData.acceleration.y];
+                                                 }];
+    
+//    [self.motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXTrueNorthZVertical
+//                                                            toQueue:[NSOperationQueue mainQueue]
+//                                                        withHandler:^(CMDeviceMotion * motion, NSError * error) {
+//                                                            NSLog(@"attitude: %f %f %f",
+//                                                                  motion.attitude.pitch,
+//                                                                  motion.attitude.roll,
+//                                                                  motion.attitude.yaw);
+//                                                            AudioManager *audioManager = [AudioManager instance];
+//                                                            [audioManager setFrequency:100+50*motion.attitude.pitch/(M_PI*2)];
+//                                                            [audioManager setFrequency2:100+50*motion.attitude.roll/(M_PI*2)];
+//                                                            [audioManager setFrequency3:100+50*motion.attitude.yaw/(M_PI*2)];
+//                                                        }];
     
     return YES;
 }

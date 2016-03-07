@@ -11,6 +11,7 @@
 #import "AudioGenerators.h"
 
 //#include "Blit.h"
+#include "Shakers.h"
 
 #import <vector>
 
@@ -22,8 +23,9 @@
     
     float gain;
     
-    std::vector<SawOsc> our_sines;
+//    std::vector<SawOsc> our_sines;
     
+    stk::Shakers *mShaker;
 }
 
 @end
@@ -51,34 +53,35 @@
     
     gain = 0;
     
-//    stk::Stk::setSampleRate(MY_COOL_SRATE);
+    mShaker = new stk::Shakers(1);
     
-    our_sines.push_back(SawOsc());
-    our_sines.push_back(SawOsc());
-    our_sines.push_back(SawOsc());
-    our_sines.push_back(SawOsc());
-    our_sines.push_back(SawOsc());
+    stk::Stk::setSampleRate(MY_COOL_SRATE);
     
-    for(int i = 0; i < our_sines.size(); i++)
-    {
-        our_sines[i].setFreq(263*(1+i));
-        our_sines[i].setGain(1.0/(1+i));
-    }
+//    our_sines.push_back(SawOsc());
+//    our_sines.push_back(SawOsc());
+//    our_sines.push_back(SawOsc());
+//    our_sines.push_back(SawOsc());
+//    our_sines.push_back(SawOsc());
+    
+//    for(int i = 0; i < our_sines.size(); i++)
+//    {
+//        our_sines[i].setFreq(263*(1+i));
+//        our_sines[i].setGain(1.0/(1+i));
+//    }
     
     //std::string stdFilepath = std::string([filepath UTF8String]);
     
     [_audioController addChannels:@[[AEBlockChannel channelWithBlock: ^(const AudioTimeStamp *time,
                                                                        UInt32 frames,
                                                                        AudioBufferList *audio) {
-        
         for(int i = 0; i < frames; i++)
         {
             float samp = 0;
-            
-            for(int i = 0; i < our_sines.size(); i++)
-            {
-                samp += our_sines[i].tick();
-            }
+            samp = mShaker->tick();
+//            for(int i = 0; i < our_sines.size(); i++)
+//            {
+//                samp += our_sines[i].tick();
+//            }
     
             ((float*)(audio->mBuffers[0].mData))[i] = samp;
             ((float*)(audio->mBuffers[1].mData))[i] = samp;
@@ -96,6 +99,8 @@
 
 - (void)setFrequency:(float)frequency
 {
+    if (frequency > 1)
+        mShaker->noteOn(frequency*400,frequency);
 }
 
 - (void)setFrequency2:(float)frequency
