@@ -10,8 +10,7 @@
 #import "TheAmazingAudioEngine/TheAmazingAudioEngine.h"
 #import "AudioGenerators.h"
 
-#include "Blit.h"
-#include "FileWvIn.h"
+//#include "Blit.h"
 
 #import <vector>
 
@@ -25,10 +24,6 @@
     
     std::vector<SawOsc> our_sines;
     
-    stk::Blit blit;
-    stk::Blit blit2;
-    stk::Blit blit3;
-    stk::FileWvIn file;
 }
 
 @end
@@ -56,7 +51,7 @@
     
     gain = 0;
     
-    stk::Stk::setSampleRate(MY_COOL_SRATE);
+//    stk::Stk::setSampleRate(MY_COOL_SRATE);
     
     our_sines.push_back(SawOsc());
     our_sines.push_back(SawOsc());
@@ -70,11 +65,7 @@
         our_sines[i].setGain(1.0/(1+i));
     }
     
-    blit.setFrequency(263);
-    
-    NSString *filepath = [[NSBundle mainBundle] pathForResource:@"amen.wav" ofType:@""];
     //std::string stdFilepath = std::string([filepath UTF8String]);
-    file.openFile([filepath UTF8String]);
     
     [_audioController addChannels:@[[AEBlockChannel channelWithBlock: ^(const AudioTimeStamp *time,
                                                                        UInt32 frames,
@@ -84,21 +75,11 @@
         {
             float samp = 0;
             
-//            for(int i = 0; i < our_sines.size(); i++)
-//            {
-//                samp += our_sines[i].tick();
-//            }
-            
-            samp += blit.tick();
-            samp += blit2.tick();
-            samp += blit3.tick();
-            
-            samp *= gain;
-            
-            samp += file.tick();
-            if(file.isFinished())
-                file.reset();
-            
+            for(int i = 0; i < our_sines.size(); i++)
+            {
+                samp += our_sines[i].tick();
+            }
+    
             ((float*)(audio->mBuffers[0].mData))[i] = samp;
             ((float*)(audio->mBuffers[1].mData))[i] = samp;
         }
@@ -115,17 +96,14 @@
 
 - (void)setFrequency:(float)frequency
 {
-    blit.setFrequency(frequency);
 }
 
 - (void)setFrequency2:(float)frequency
 {
-    blit2.setFrequency(frequency);
 }
 
 - (void)setFrequency3:(float)frequency
 {
-    blit3.setFrequency(frequency);
 }
 
 @end
